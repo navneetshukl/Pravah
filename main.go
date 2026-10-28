@@ -1,9 +1,6 @@
 package main
 
-import (
-	"log"
-	"sync"
-)
+import "log"
 
 type Task struct {
 	id         int
@@ -21,32 +18,22 @@ func newTask(id int, value_type, status string, data interface{}) Task {
 	}
 }
 
-type MemStore struct {
-	store map[int]Task
-	mut   *sync.Mutex
-	index int
-}
-
-func newMemStore() *MemStore {
-	return &MemStore{
-		store: make(map[int]Task),
-		mut:   &sync.Mutex{},
-		index: 0,
-	}
-}
-
-func (m *MemStore) AddTask(value_type string, data interface{}) bool {
-	m.mut.Lock()
-	defer m.mut.Unlock()
-	m.index++
-	m.store[m.index] = newTask(m.index, value_type, PENDING.ToString(), data)
-	return true
-}
-
 func main() {
-	store := newMemStore()
-	for i := 1; i < 100; i++ {
-		store.AddTask("queue", i)
+
+	q:=NewQueue()
+
+	log.Println("Before Memory")
+	PrintMemoryUsageMB()
+
+	for i:=1;i<10000;i++{
+		task:=newTask(i,"int",PENDING.ToString(),i)
+		q.Enqueue(task)
+
 	}
-	log.Println(store.store)
+
+	log.Println("Total Added Task ",len(q.arr))
+
+	log.Println("After Memory")
+	PrintMemoryUsageMB()
+
 }
